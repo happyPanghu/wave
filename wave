@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>wave</title>
+    <style type="text/css">
+
+    </style>
+</head>
+
+<body>
+    <div class="wave">
+        <!--https://codepen.io/lecein/pen/dOKrmr -->
+        <!-- http://blog.csdn.net/lecepin/article/details/53536445 -->
+        <canvas id="c"></canvas>
+    </div>
+</body>
+<script type="text/javascript">
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+
+//画布属性
+var mW = canvas.width = 300;
+var mH = canvas.height = 300;
+var lineWidth = 2;
+
+//圆属性
+var r = mH / 2; //圆心
+var cR = r - 16 * lineWidth; //圆半径
+var IsdrawCircled = false; //画圈函数
+
+//兼容 二倍 三倍屏
+var n = window.devicePixelRatio;
+if (n) {
+    canvas.style.width = mW + "px";
+    canvas.style.height = mH + "px";
+    canvas.width = mW * n;
+    canvas.height = mH * n;
+    ctx.scale(n, n);
+}
+
+//Sin 曲线属性
+var sX = 0;
+var sY = mH / 2;
+var axisLength = 300; //轴长
+var axisLength2 = 800;
+var waveWidth = 0.018; //波浪宽度,数越小越宽    
+var waveWidth2 = 0.014;
+var waveHeight = 20; //波浪高度,数越大越高
+var waveHeight2 = 16;
+var speed = 0.09; //波浪速度，数越大速度越快
+var speed2 = 0.12;
+var xOffset = 0; //波浪x偏移量
+var xOffset2 = 0; //波浪x偏移量
+
+
+//渐变圆环
+var drawCircle = function() {
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    var grad = ctx.createLinearGradient(0, 0, 0, mH); //渐变方向 向下
+    grad.addColorStop(0, '#0bd163'); //定义过渡颜色 紫
+    grad.addColorStop(1, '#01baed'); // // 红    
+    ctx.strokeStyle = 'transparent';
+    ctx.fillStyle = grad; //设置或返回用于填充绘画的颜色、渐变或模式
+    ctx.arc(r, r, r - 1, 0, 2 * Math.PI); //定义路径
+    ctx.fill(); //填充当前绘图（路径）
+    ctx.stroke(); //绘制路径
+
+    ctx.beginPath();
+    ctx.fillStyle = "#fff";
+    ctx.arc(r, r, r - 5, 0, 2 * Math.PI);
+    ctx.fill();
+    //ctx.stroke();
+
+    ctx.clip(); //从原始画布剪切任意形状和尺寸的区域
+
+    IsdrawCircled = true;
+}
+
+//画sin 曲线函数
+var drawSin = function(xo, xo2) {
+    ctx.clearRect(0, 0, mW, mH); //清除画布已经画过的sin曲线
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#01baed"; //线条的颜色
+    //在整个轴长上取点
+    for (var x = sX; x < sX + axisLength; x += 20 / axisLength) {
+        //此处坐标(x,y)的取点，依靠公式 “振幅高*sin(x*振幅宽 + 振幅偏移量)”
+        var y = -Math.sin((sX + x) * waveWidth + xo);
+        ctx.lineTo(x, sY + y * waveHeight);
+    }
+    ctx.stroke()
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#0bd163"; //线条的颜色
+    for (var x = sX; x < sX + axisLength2; x += 10 / axisLength) {
+        //此处坐标(x,y)的取点，依靠公式 “振幅高*sin(x*振幅宽 + 振幅偏移量)”
+        var y = -Math.sin((sX + x) * waveWidth2 + xo2);
+        if (x) {
+            ctx.lineTo(x - 20, sY + y * waveHeight);
+        } else {
+            ctx.moveTo(x - 20, sY + y * waveHeight);
+        }
+    }
+    ctx.stroke()
+
+    ctx.restore(); //返回之前保存过的路径状态和属性
+};
+
+var render = function() {
+    if (!IsdrawCircled) {
+        drawCircle();
+    }
+    drawSin(xOffset += speed, xOffset2 += speed2);
+   //cancelAnimationFrame 停止 判断时间 来停止
+    requestAnimationFrame(render);
+}
+render();
+</script>
+
+</html>
